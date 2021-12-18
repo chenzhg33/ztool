@@ -1,5 +1,5 @@
 <template>
-  <div ref="diffContainer" class="the-code-diff-editor-container" @change="change" />
+  <div ref="diffContainer" @change="change" />
 </template>
 
 <script>
@@ -20,7 +20,13 @@ export default {
   },
   data() {
     return {
-      monacoDiffInstance: null
+      monacoDiffInstance: null,
+      model: null
+    }
+  },
+  watch: {
+    text: function() {
+      this.setText(this.text)
     }
   },
   mounted() {
@@ -28,18 +34,28 @@ export default {
   },
   methods: {
     change() {
-      console.log('yes')
+      var content = this.model.getValue()
+      console.log(content)
+      this.$emit('contentChannge', content)
+    },
+
+    setText(text) {
+      this.model.setValue(text)
+      // this.monacoDiffInstance.setModel(this.model)
     },
     init() {
       // 初始化编辑器实例
-      console.log(this.$refs)
+      console.log('hahahah1')
       this.monacoDiffInstance = monaco.editor.create(this.$refs['diffContainer'], {
         theme: 'vs  ', // vs, hc-black, or vs-dark
         readOnly: false
       })
       this.language = 'ini'
-      var model = monaco.editor.createModel(this.text, this.language)
-      this.monacoDiffInstance.setModel(model)
+      this.model = monaco.editor.createModel(this.text, this.language)
+      this.monacoDiffInstance.setModel(this.model)
+      this.model.onDidChangeContent((event) => {
+        this.change()
+      })
     }
   }
 }
@@ -47,8 +63,7 @@ export default {
 
 <style scoped>
 .the-code-diff-editor-container {
-    width: 100%;
-    height: 200px;
+    width: 50%;
     /* overflow: auto; */
   }
 .the-code-diff-editor-container .monaco-editor .scroll-decoration {

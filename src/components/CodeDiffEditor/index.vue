@@ -18,28 +18,48 @@ export default {
     // eslint-disable-next-line vue/require-default-prop
     oldValue: String,
     // eslint-disable-next-line vue/require-default-prop
-    value: String
+    newValue: String
   },
   data() {
     return {
-      monacoDiffInstance: null
+      monacoDiffInstance: null,
+      oldModel: null,
+      newModel: null
+    }
+  },
+  watch: {
+    oldValue: function() {
+      // this.doDiff()
+    },
+    newValue: function() {
+      // this.doDiff()
     }
   },
   mounted() {
-    this.init()
   },
+
   methods: {
-    init() {
+    doDiff() {
       // 初始化编辑器实例
-      console.log(this.$refs)
+      if (this.monacoDiffInstance) {
+        this.monacoDiffInstance.dispose()
+      }
       this.monacoDiffInstance = monaco.editor.createDiffEditor(this.$refs['diffContainer'], {
-        theme: 'vs-dark', // vs, hc-black, or vs-dark
+        // theme: 'vs-dark', // vs, hc-black, or vs-dark
         readOnly: false
       })
       this.language = 'ini'
+      if (this.oldModel) {
+        this.oldModel.dispose()
+      }
+      this.oldModel = monaco.editor.createModel(this.oldValue, this.language)
+      if (this.newModel) {
+        this.newModel.dispose()
+      }
+      this.newModel = monaco.editor.createModel(this.newValue, this.language)
       this.monacoDiffInstance.setModel({
-        original: monaco.editor.createModel(this.oldValue, this.language),
-        modified: monaco.editor.createModel(this.value, this.language)
+        original: this.oldModel,
+        modified: this.newModel
       })
     }
   }
