@@ -6,6 +6,7 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 import 'monaco-editor/esm/vs/basic-languages/shell/shell.contribution'
 import 'monaco-editor/esm/vs/basic-languages/sql/sql.contribution'
+import 'monaco-editor/esm/vs/basic-languages/ini/ini.contribution'
 import 'monaco-editor/esm/vs/basic-languages/python/python.contribution'
 import 'monaco-editor/esm/vs/editor/contrib/find/findController.js'
 
@@ -29,18 +30,18 @@ export default {
   },
   watch: {
     oldValue: function() {
-      // this.doDiff()
+      this.oldModel.setValue(this.oldValue)
     },
     newValue: function() {
-      // this.doDiff()
+      this.newModel.setValue(this.newValue)
     }
   },
   mounted() {
+    this.init()
   },
 
   methods: {
-    doDiff() {
-      // 初始化编辑器实例
+    init() {
       if (this.monacoDiffInstance) {
         this.monacoDiffInstance.dispose()
       }
@@ -61,6 +62,52 @@ export default {
         original: this.oldModel,
         modified: this.newModel
       })
+    },
+
+    doDiff(oldText, newText) {
+      this.oldValue = oldText
+      this.newValue = newText
+      // this.oldModel.setValue(oldText)
+      // this.newModel.setValue(newText)
+    },
+
+    onlyShowDiff() {
+      var diffEditor = this.monacoDiffInstance
+      var versionContentLines = this.oldValue.split('\n').length
+      var onlineContentLines = this.newValue.split('\n').length
+      var lineChanges = diffEditor.getLineChanges().slice()
+      console.log('diffEditor.getLineChanges().slice()')
+      console.log(lineChanges)
+      var originHideRanges = []; var modifyHideRanges = []
+      for (var i in lineChanges) {
+        if (lineChanges[i].originalEndLineNumber === 0) {
+          lineChanges[i].originalEndLineNumber = versionContentLines + 1
+        }
+        if (lineChanges[i].modifiedEndLineNumber === 0) {
+          lineChanges[i].modifiedEndLineNumber = onlineContentLines + 1
+        }
+      }
+      lineChanges.unshift({ 'originalStartLineNumber': 0, 'originalEndLineNumber': 0, 'modifiedStartLineNumber': 0, 'modifiedEndLineNumber': 0 })
+      lineChanges.push({ 'originalStartLineNumber': versionContentLines + 1, 'originalEndLineNumber': versionContentLines + 1, 'modifiedStartLineNumber': onlineContentLines + 1, 'modifiedEndLineNumber': onlineContentLines + 1 })
+      console.log('calc lineChanges')
+      console.log(lineChanges)
+      for (var i = 0; i < lineChanges.length - 1; i++) {
+        if (lineChanges[i].originalEndLineNumber + 1 <= lineChanges[i + 1].originalStartLineNumber - 1) {
+          originHideRanges.push(new monaco.Range(lineChanges[i].originalEndLineNumber + 1, 1, lineChanges[i + 1].originalStartLineNumber - 1, 1))
+        }
+        if (lineChanges[i].modifiedEndLineNumber + 1 <= lineChanges[i + 1].modifiedStartLineNumber - 1) {
+          modifyHideRanges.push(new monaco.Range(lineChanges[i].modifiedEndLineNumber + 1, 1, lineChanges[i + 1].modifiedStartLineNumber - 1, 1))
+        }
+      }
+      console.log(originHideRanges)
+      console.log(modifyHideRanges)
+      diffEditor.getOriginalEditor().setHiddenAreas(originHideRanges)
+      diffEditor.getModifiedEditor().setHiddenAreas(modifyHideRanges)
+    },
+    showAll() {
+      var diffEditor = this.monacoDiffInstance
+      diffEditor.getOriginalEditor().setHiddenAreas([])
+      diffEditor.getModifiedEditor().setHiddenAreas([])
     }
   }
 }

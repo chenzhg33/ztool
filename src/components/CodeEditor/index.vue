@@ -24,11 +24,11 @@ export default {
       model: null
     }
   },
-  watch: {
-    text: function() {
-      this.setText(this.text)
-    }
-  },
+  // watch: {
+  //   text: function() {
+  //     // this.setText(this.text)
+  //   }
+  // },
   mounted() {
     this.init()
   },
@@ -46,11 +46,20 @@ export default {
     init() {
       // 初始化编辑器实例
       console.log('hahahah1')
+      if (this.monacoDiffInstance) {
+        this.monacoDiffInstance.dispose()
+      }
       this.monacoDiffInstance = monaco.editor.create(this.$refs['diffContainer'], {
-        theme: 'vs  ', // vs, hc-black, or vs-dark
-        readOnly: false
+        theme: 'vs', // vs, hc-black, or vs-dark
+        readOnly: false,
+        minimap: {
+          enabled: false
+        }
       })
       this.language = 'ini'
+      if (this.model) {
+        this.model.dispose()
+      }
       this.model = monaco.editor.createModel(this.text, this.language)
       this.monacoDiffInstance.setModel(this.model)
       this.model.onDidChangeContent((event) => {
