@@ -56,23 +56,16 @@ export const constantRoutes = [
   },
 
   {
-    path: '/example',
+    path: '/text',
     component: Layout,
-    redirect: '/example/table',
+    redirect: '/text/index',
     name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        path: 'index',
+        component: () => import('@/views/texttool/index'),
+        name: 'texttool',
+        meta: { title: '文本处理', icon: 'el-icon-s-help' }
       }
     ]
   },
