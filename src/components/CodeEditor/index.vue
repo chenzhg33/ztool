@@ -3,26 +3,26 @@
 </template>
 
 <script>
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
-import 'monaco-editor/esm/vs/basic-languages/shell/shell.contribution'
-import 'monaco-editor/esm/vs/basic-languages/sql/sql.contribution'
-import 'monaco-editor/esm/vs/basic-languages/python/python.contribution'
-import 'monaco-editor/esm/vs/editor/contrib/find/findController.js'
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+import "monaco-editor/esm/vs/basic-languages/shell/shell.contribution";
+import "monaco-editor/esm/vs/basic-languages/sql/sql.contribution";
+import "monaco-editor/esm/vs/basic-languages/python/python.contribution";
+import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 
 export default {
   props: {
     language: {
       type: String,
-      default: 'ini'
+      default: "ini",
     },
     // eslint-disable-next-line vue/require-default-prop
-    text: String
+    text: String,
   },
   data() {
     return {
       monacoDiffInstance: null,
-      model: null
-    }
+      model: null,
+    };
   },
   // watch: {
   //   text: function() {
@@ -30,52 +30,59 @@ export default {
   //   }
   // },
   mounted() {
-    this.init()
+    this.init();
   },
   methods: {
     change() {
-      var content = this.model.getValue()
-      console.log(content)
-      this.$emit('contentChannge', content)
+      var content = this.model.getValue();
+      console.log(content);
+      this.$emit("contentChannge", content);
     },
 
     setText(text) {
-      this.model.setValue(text)
+      this.model.setValue(text);
       // this.monacoDiffInstance.setModel(this.model)
+    },
+    updateOptions(options) {
+      console.log(options);
+      this.monacoDiffInstance.updateOptions(options);
     },
     init() {
       // 初始化编辑器实例
-      console.log('hahahah1')
+      console.log("hahahah1");
       if (this.monacoDiffInstance) {
-        this.monacoDiffInstance.dispose()
+        this.monacoDiffInstance.dispose();
       }
-      this.monacoDiffInstance = monaco.editor.create(this.$refs['diffContainer'], {
-        theme: 'vs', // vs, hc-black, or vs-dark
-        readOnly: false,
-        minimap: {
-          enabled: false
+      this.monacoDiffInstance = monaco.editor.create(
+        this.$refs["diffContainer"],
+        {
+          theme: "vs", // vs, hc-black, or vs-dark
+          readOnly: false,
+          minimap: {
+            enabled: false,
+          },
         }
-      })
-      this.language = 'ini'
+      );
+      this.language = "ini";
       if (this.model) {
-        this.model.dispose()
+        this.model.dispose();
       }
-      this.model = monaco.editor.createModel(this.text, this.language)
-      this.monacoDiffInstance.setModel(this.model)
+      this.model = monaco.editor.createModel(this.text, this.language);
+      this.monacoDiffInstance.setModel(this.model);
       this.model.onDidChangeContent((event) => {
-        this.change()
-      })
-    }
-  }
-}
+        this.change();
+      });
+    },
+  },
+};
 </script>
 
 <style scoped>
 .the-code-diff-editor-container {
-    width: 50%;
-    /* overflow: auto; */
-  }
+  width: 50%;
+  /* overflow: auto; */
+}
 .the-code-diff-editor-container .monaco-editor .scroll-decoration {
-   box-shadow: none;
+  box-shadow: none;
 }
 </style>
