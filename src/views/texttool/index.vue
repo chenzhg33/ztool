@@ -16,6 +16,8 @@
       }}</el-button>
       <el-button type="info" @click="urlDecode">URL解码</el-button>
       <el-button type="primary" @click="urlEncode">URL编码</el-button>
+      <el-button type="success" @click="toUpper">转大写</el-button>
+      <el-button type="info" @click="toLower">转小写</el-button>
     </div>
     <div v-show="bFilterMode" class="margin10 border1">
       <div class="margin10">
@@ -271,6 +273,12 @@ export default {
     },
     urlEncode() {
       this.$refs.rightEditor.setText(encodeURIComponent(this.editorText));
+    },
+    toUpper() {
+      this.$refs.rightEditor.setText(this.editorText.toUpperCase());
+    },
+    toLower() {
+      this.$refs.rightEditor.setText(this.editorText.toLowerCase());
     },
     wordWrap() {
       this.isWordWrap = !this.isWordWrap;
