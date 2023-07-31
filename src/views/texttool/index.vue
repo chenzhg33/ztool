@@ -34,7 +34,7 @@
         <el-button
           v-for="item in regPatterns"
           :key="item.label"
-          class="margin10"
+          class="margin5"
           :data-pattern="item.pattern"
           :type="item.type"
           size="mini"
@@ -90,10 +90,11 @@ export default {
         { type: "info", label: "数字", pattern: "\\d+" },
         {
           type: "danger",
-          label: "IP:PORT",
+          label: "IP:端口",
           pattern: "\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+",
         },
         { type: "warning", label: "变量名", pattern: "[a-z_A-Z0-9]+" },
+        { type: "primary", label: "模块", pattern: "mm[a-z_A-Z0-9]+" },
       ],
       diffOldValue: "",
       diffNewValue: "",
@@ -321,6 +322,10 @@ export default {
 
 .margin10 {
   margin: 10px;
+}
+
+.margin5 {
+  margin: 5px;
 }
 
 .border1 {
