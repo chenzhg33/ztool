@@ -65,11 +65,12 @@
         <el-button type="primary" size="small" class="margin10" @click="doReplace"
           >替换</el-button
         >
-        <el-button
+        <!-- <el-button
           type="primary"
           size="small"
           @click="doWordReplace"
-        >确定</el-button>
+        >单词替换</el-button> -->
+
       </div>
 
       <div class="margin10">
@@ -157,6 +158,7 @@ export default {
       wordReplacePatterns: [
       { type: "success", label: "换行", pattern: "\\n" },
         { type: "info", label: "','", pattern: "','" },
+        { type: "info", label: ",", pattern: "," },
 
       ],
       wordReplaceOld: "\\n",
@@ -315,11 +317,12 @@ export default {
       const oldText = this.wordReplaceOld;
       const newText = this.wordReplaceNew;
       
-      // Create RegExp with word boundaries and global flag
-      const regex = new RegExp(`\\b${oldText}\\b`, 'g');
+      // Improved regex with word boundaries and escape special characters
+      const escapedText = oldText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(^|\\s)${escapedText}(?=\\s|$)`, 'g');
       
       // Replace text in left editor and update right editor
-      const replacedText = this.editorText.replace(regex, newText);
+      const replacedText = this.editorText.replace(regex, `$1${newText}`);
       this.$refs.rightEditor.setText(replacedText);
     },
     doReplace() {
