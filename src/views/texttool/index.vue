@@ -2,23 +2,26 @@
   <div>
     <div style="margin: 10px">
       <!-- <el-button type="info" @click="changeEditorNum">{{ bOneEditor ? '双编辑器' : '单编辑器' }}</el-button> -->
-      <el-button type="info" @click="wordWrap">换行</el-button>
-      <el-button type="primary" @click="contentTrim">Trim</el-button>
-      <el-button type="success" @click="contentSort">SORT</el-button>
-      <el-button type="info" @click="contentDelBlankLine">去空行</el-button>
-      <el-button type="success" @click="contentUnique">UNIQ</el-button>
-      <el-button type="info" @click="contentInter">交集</el-button>
-      <el-button type="primary" @click="showFilter">过滤</el-button>
-      <el-button type="success" @click="contentEdit">返回编辑</el-button>
-      <el-button type="info" @click="contentDiff">对比</el-button>
-      <el-button type="success" @click="onlyShowDiff">{{
+      <el-button type="info" size="small" @click="wordWrap">换行</el-button>
+      <el-button type="info" size="small" @click="contentDelBlankLine">去空行</el-button>
+      <el-button type="primary" size="small" @click="contentTrim">Trim</el-button>
+      <el-button type="success" size="small" @click="contentSort">SORT</el-button>
+      <el-button type="success" size="small" @click="contentUnique">UNIQ</el-button>
+      <el-button type="info" size="small" @click="contentInter">交集</el-button>
+      <el-button type="info" size="small" @click="contentSwap">交换</el-button>
+      <el-button type="primary" size="small" @click="showFilter">过滤</el-button>
+      <el-button type="primary" size="small" @click="showWordReplace">替换</el-button>
+      <el-button type="success" size="small" @click="contentEdit">返回编辑</el-button>
+      <el-button type="info" size="small" @click="contentDiff">对比</el-button>
+      <el-button type="success" size="small" @click="onlyShowDiff">{{
         bOnlyShowDiff ? "查看全部" : "只看差异"
       }}</el-button>
-      <el-button type="info" @click="urlDecode">URL解码</el-button>
-      <el-button type="primary" @click="urlEncode">URL编码</el-button>
-      <el-button type="success" @click="toUpper">转大写</el-button>
-      <el-button type="info" @click="toLower">转小写</el-button>
+      <el-button type="info" size="small" @click="urlDecode">URL解码</el-button>
+      <el-button type="primary" size="small" @click="urlEncode">URL编码</el-button>
+      <el-button type="success" size="small" @click="toUpper">转大写</el-button>
+      <el-button type="info" size="small" @click="toLower">转小写</el-button>
     </div>
+
     <div v-show="bFilterMode" class="margin10 border1">
       <div class="margin10">
         <el-input
@@ -26,7 +29,7 @@
           style="width: 50%"
           placeholder="请输入过滤的正则表达式"
         />
-        <el-button type="primary" class="margin10" @click="contentFilter"
+        <el-button type="primary" size="small" class="margin10" @click="contentFilter"
           >确定</el-button
         >
       </div>
@@ -44,6 +47,59 @@
           >{{ item.label }}</el-button
         >
       </div>
+    </div>
+
+    <div v-show="bWordReplaceMode" class="margin10 border1">
+      <div class="margin10">
+        <el-input
+          v-model="wordReplaceOld"
+          style="width: 20%"
+          placeholder="请输入要替换的旧字符串"
+        />
+        <span style="margin: 10px">替换为</span>
+        <el-input
+          v-model="wordReplaceNew"
+          style="width: 20%"
+          placeholder="请输入要替换的新字符串"
+        />
+        <el-button type="primary" size="small" class="margin10" @click="doReplace"
+          >替换</el-button
+        >
+        <el-button
+          type="primary"
+          size="small"
+          @click="doWordReplace"
+        >确定</el-button>
+      </div>
+
+      <div class="margin10">
+        <el-tag type="success">旧字符串:</el-tag>
+
+        <el-button
+          v-for="item in wordReplacePatterns"
+          :key="item.label"
+          class="margin5"
+          :data-pattern="item.pattern"
+          :type="item.type"
+          size="mini"
+          @click="chooseOldWordReplacePattern(item.pattern)"
+          >{{ item.label }}</el-button
+        >
+
+        <el-tag  class="margin-left-100" type="success">新字符串:</el-tag>
+
+        <el-button
+          v-for="item in wordReplacePatterns"
+          :key="item.label"
+          class="margin5"
+          :data-pattern="item.pattern"
+          :type="item.type"
+          size="mini"
+          @click="chooseNewWordReplacePattern(item.pattern)"
+          >{{ item.label }}</el-button
+        >
+      </div>
+
     </div>
 
     <div v-show="isDiff == false">
@@ -98,6 +154,13 @@ export default {
         { type: "warning", label: "变量名", pattern: "[a-z_A-Z0-9]+" },
         { type: "primary", label: "模块", pattern: "mm[a-z_A-Z0-9]+" },
       ],
+      wordReplacePatterns: [
+      { type: "success", label: "换行", pattern: "\\n" },
+        { type: "info", label: "','", pattern: "','" },
+
+      ],
+      wordReplaceOld: "\\n",
+      wordReplaceNew: "",
       diffOldValue: "",
       diffNewValue: "",
 
@@ -108,6 +171,7 @@ export default {
       bOnlyShowDiff: false,
       bOneEditor: false,
       bFilterMode: false,
+      bWordReplaceMode: false,
       filterPattern: "",
       isWordWrap: false,
     };
@@ -226,8 +290,16 @@ export default {
 
       this.contentDiff();
     },
+    contentSwap() {
+      var text = this.editorText;
+      this.$refs.leftEditor.setText(this.rightEditorText);
+      this.$refs.rightEditor.setText(text);
+    },  
     showFilter() {
       this.bFilterMode = !this.bFilterMode;
+    },
+    showWordReplace() {
+      this.bWordReplaceMode = !this.bWordReplaceMode;
     },
     contentFilter() {
       var re = new RegExp(this.filterPattern, "g");
@@ -239,10 +311,37 @@ export default {
       }
       this.$refs.rightEditor.setText(lines.join("\n"));
     },
+    doWordReplace() {
+      const oldText = this.wordReplaceOld;
+      const newText = this.wordReplaceNew;
+      
+      // Create RegExp with word boundaries and global flag
+      const regex = new RegExp(`\\b${oldText}\\b`, 'g');
+      
+      // Replace text in left editor and update right editor
+      const replacedText = this.editorText.replace(regex, newText);
+      this.$refs.rightEditor.setText(replacedText);
+    },
+    doReplace() {
+      const oldText = this.wordReplaceOld;
+      const newText = this.wordReplaceNew;
+      const regex = new RegExp(oldText, 'g');
+      // Replace text in left editor and update right editor
+      const replacedText = this.editorText.replace(regex, newText);
+      this.$refs.rightEditor.setText(replacedText);
+    },
     chooseFilterPattern(pattern) {
       console.log(pattern);
       this.filterPattern = pattern;
     },
+    chooseOldWordReplacePattern(pattern) {
+      console.log(pattern);
+      this.wordReplaceOld = pattern;
+    },
+    chooseNewWordReplacePattern(pattern) {
+      console.log(pattern);
+      this.wordReplaceNew = pattern;
+    },  
 
     contentDiff() {
       this.isDiff = true;
@@ -330,6 +429,10 @@ export default {
 
 .margin10 {
   margin: 10px;
+}
+
+.margin-left-100 {
+  margin: 0px 0px 0px 100px;
 }
 
 .margin5 {
